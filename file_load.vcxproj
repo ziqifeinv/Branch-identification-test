@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <ProjectGuid>{0158FE6D-1E17-40BD-9980-3F638ADEC4C0}</ProjectGuid>
+    <RootNamespace>fileload</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\workspace\vs\file_load\wq_vtb\inc;D:\workspace\vs\file_load\wq_vtb\ext_inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="main.c" />
+    <ClCompile Include="wq_vtb\src\bit.c" />
+    <ClCompile Include="wq_vtb\src\convolutional.c" />
+    <ClCompile Include="wq_vtb\src\conv_decode.c" />
+    <ClCompile Include="wq_vtb\src\conv_encode.c" />
+    <ClCompile Include="wq_vtb\src\crc_check.c" />
+    <ClCompile Include="wq_vtb\src\crc_generator.c" />
+    <ClCompile Include="wq_vtb\src\deinterleaver.c" />
+    <ClCompile Include="wq_vtb\src\descrambler.c" />
+    <ClCompile Include="wq_vtb\src\disturbance_detection.c" />
+    <ClCompile Include="wq_vtb\src\error_buffer.c" />
+    <ClCompile Include="wq_vtb\src\fec_shim.c" />
+    <ClCompile Include="wq_vtb\src\history_buffer.c" />
+    <ClCompile Include="wq_vtb\src\interleaver.c" />
+    <ClCompile Include="wq_vtb\src\lookup.c" />
+    <ClCompile Include="wq_vtb\src\metric.c" />
+    <ClCompile Include="wq_vtb\src\polynomial.c" />
+    <ClCompile Include="wq_vtb\src\portable.c" />
+    <ClCompile Include="wq_vtb\src\preamble_generator.c" />
+    <ClCompile Include="wq_vtb\src\reed-solomon.c" />
+    <ClCompile Include="wq_vtb\src\rs_decode.c" />
+    <ClCompile Include="wq_vtb\src\rs_encode.c" />
+    <ClCompile Include="wq_vtb\src\scramble.c" />
+    <ClCompile Include="wq_vtb\src\syncronizaiton.c" />
+    <ClCompile Include="wq_vtb\src\wq_vtb_bit_rec.c" />
+    <ClCompile Include="wq_vtb\src\wq_vtb_data_to_bit.c" />
+    <ClCompile Include="wq_vtb\src\wq_vtb_topo_rec.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="wq_vtb\ext_inc\wq_vtb_bit_rec.h" />
+    <ClInclude Include="wq_vtb\ext_inc\wq_vtb_data_to_bit.h" />
+    <ClInclude Include="wq_vtb\ext_inc\wq_vtb_topo_rec.h" />
+    <ClInclude Include="wq_vtb\inc\bit.h" />
+    <ClInclude Include="wq_vtb\inc\convolutional.h" />
+    <ClInclude Include="wq_vtb\inc\conv_common.h" />
+    <ClInclude Include="wq_vtb\inc\conv_decode.h" />
+    <ClInclude Include="wq_vtb\inc\correct.h" />
+    <ClInclude Include="wq_vtb\inc\crc_check.h" />
+    <ClInclude Include="wq_vtb\inc\crc_generator.h" />
+    <ClInclude Include="wq_vtb\inc\deinterleaver.h" />
+    <ClInclude Include="wq_vtb\inc\descrambler.h" />
+    <ClInclude Include="wq_vtb\inc\disturbance_detection.h" />
+    <ClInclude Include="wq_vtb\inc\error_buffer.h" />
+    <ClInclude Include="wq_vtb\inc\fec_shim.h" />
+    <ClInclude Include="wq_vtb\inc\field.h" />
+    <ClInclude Include="wq_vtb\inc\history_buffer.h" />
+    <ClInclude Include="wq_vtb\inc\interleaver.h" />
+    <ClInclude Include="wq_vtb\inc\lookup.h" />
+    <ClInclude Include="wq_vtb\inc\metric.h" />
+    <ClInclude Include="wq_vtb\inc\polynomial.h" />
+    <ClInclude Include="wq_vtb\inc\portable.h" />
+    <ClInclude Include="wq_vtb\inc\preamble_generator.h" />
+    <ClInclude Include="wq_vtb\inc\reed-solomon.h" />
+    <ClInclude Include="wq_vtb\inc\rs_common.h" />
+    <ClInclude Include="wq_vtb\inc\rs_decode.h" />
+    <ClInclude Include="wq_vtb\inc\rs_encode.h" />
+    <ClInclude Include="wq_vtb\inc\scramble.h" />
+    <ClInclude Include="wq_vtb\inc\syncronization.h" />
+    <ClInclude Include="wq_vtb\inc\wq_debug.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
