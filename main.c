@@ -47,7 +47,7 @@ int main(void)
 		printf("topo create fail\n");
 		exit(0);
 	}
-	file = fopen("测试数据/err.log", "r");
+	file = fopen("测试数据/err2.log", "r");
 	if (file == NULL) {
 		printf("file open fail!\n");
 		getchar();

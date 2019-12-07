@@ -487,6 +487,49 @@ uint32_t wq_preamble_detect(rx_topo_init_t *rx, uint32_t phase, uint32_t scale,
     return ret;
 }
 
+#ifndef USER_POS_ENABLE
+#define USER_POS_ENABLE     1
+#endif // !USER_POS_ENABLE
+
+#if USER_POS_ENABLE
+static wq_prm_bit_val_t user_pos[33] = {
+//|___pos___|___sign___|___val___|___bit_cnt___|
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2},
+    {{0,1,2},{0,1,2},{0,1,2},2}
+};
+#endif
+
 void wq_preamble_push_bit(rx_topo_init_t *rx, uint32_t phase,
     wq_prm_bit_val_t *preamble_bit)
 {
@@ -502,9 +545,17 @@ void wq_preamble_push_bit(rx_topo_init_t *rx, uint32_t phase,
 
     /* Push one buffer ahead */
     memcpy(p_prm, p_prm + 1, sizeof(*p_prm) * (PREAMBLE_BIT_LEN - 1));
+#if !USER_POS_ENABLE
     /* Store coming buffer on the tail. */
     memcpy(p_prm + (PREAMBLE_BIT_LEN - 1), preamble_bit, sizeof(*p_prm));
-
+# else
+    static uint32_t prm_counter = 0;
+    memcpy(p_prm + (PREAMBLE_BIT_LEN - 1), &user_pos[prm_counter], sizeof(wq_prm_bit_val_t));
+    prm_counter++;
+    if (prm_counter >= 32) {
+        prm_counter = 0;
+    }
+#endif
     return;
 }
 
@@ -604,6 +655,7 @@ uint32_t wq_preamble_scan_rough_2(uint32_t phase, iot_bits_timming_t* timming,
     uint32_t bits_cnt_tmp = 0, i = 0;
     iot_rx_topo_preamble_t almost_prmb = { 0 };
     uint16_t bit1_pos_save[PREAMBLE_LENGTH] = { 0 };
+    uint8_t merged_counter = 0;
 
     uint32_t temp_pos[100] = { 0 };
     uint32_t temp_sign[100] = { 0 };
@@ -621,6 +673,7 @@ uint32_t wq_preamble_scan_rough_2(uint32_t phase, iot_bits_timming_t* timming,
                     //timming[i].sign = 1;
                     //timming[i - 1].sign = 1;
                     timming[i].sign = timming[i - 1].sign;
+                    merged_counter++;
                     temp_pos[i] = temp_pos[i - 1];
                     temp_sign[i] = temp_sign[i - 1];
                 }
@@ -743,8 +796,9 @@ uint32_t wq_preamble_scan_rough_2(uint32_t phase, iot_bits_timming_t* timming,
         }
 
         /* Check if valid with bits_active & bits_negative */
-        if ((bits_negative <= WQ_VTB_AMP_ERR_BITS)
-            && (bits_active > bits_negative)) {
+//        if ((bits_negative <= WQ_VTB_AMP_ERR_BITS + merged_counter)
+        //if ((bits_negative <= WQ_VTB_AMP_ERR_BITS)
+        //    && (bits_active > bits_negative)) {
             /* Valid almost preabmle */
             if (bit1_cnt > 0) {
                 temp_ave_val = sum_val / bit1_cnt;
@@ -766,7 +820,7 @@ uint32_t wq_preamble_scan_rough_2(uint32_t phase, iot_bits_timming_t* timming,
                     bits_neg_old = bits_negative;
                 }
             }
-        }
+        //}
 
         /* Search next preamble. */
         if (pos_cur == pos_end) {
@@ -947,7 +1001,7 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t *rx_ptr,  uint8_t phase, int32_t *sample_dat
     int32_t pos, i;
     rx_topo_init_t *rx = (rx_topo_init_t*)rx_ptr;
     //static uint8_t mask_counter = 0;
-
+    static uint16_t act_bits = 0, neg_bits = 0;
 /*
     if (phase == 0) {
         wq_vtb_adc_data_format_print(sample_data, data_len, phase);
@@ -988,9 +1042,15 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t *rx_ptr,  uint8_t phase, int32_t *sample_dat
     } else {
         if (mask) {
             for (i = 0; i < preamble_bit.bit_cnt; i++) {
-                if (preamble_bit.bit_pos[i] < (pos + 40)
-                    && preamble_bit.bit_pos[i] > (pos - 40)) {
+                if (preamble_bit.bit_pos[i] < (pos + 128)
+                    && preamble_bit.bit_pos[i] > (pos - 128)) {
                     rx->correct_offset[phase] = preamble_bit.bit_pos[i];
+                    if (preamble_bit.mag_sign[i] == 1) {
+                        act_bits++;
+                    }
+                    else {
+                        neg_bits++;
+                    }
                     break;
                 }
             }
@@ -1003,6 +1063,12 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t *rx_ptr,  uint8_t phase, int32_t *sample_dat
         //try to decode the current data in the buffer
         decode_flag = decode_data_per_phase(rx, phase, mask, decoded_data,
             decoded_data_len, &reset);
+        if (decode_flag) {
+            wq_dbg_printf("phase %d act_bits:%d, neg_bits:%d \n", phase, act_bits, neg_bits);
+            if (neg_bits > act_bits || neg_bits > WQ_VTB_AMP_ERR_BITS) {
+                decode_flag = 0;
+            }
+        }
     }
 
 #if 1 /* TODO : Remove delta for this point. Coming soon */
@@ -1022,6 +1088,8 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t *rx_ptr,  uint8_t phase, int32_t *sample_dat
         for(uint16_t i = 0; i < 160; i++){
             rx->phase_data_buf[phase][i] = 0;
         }
+        act_bits = 0;
+        neg_bits = 0;
         rx->call_time[phase] = 0;
         rx->msg_count[phase] = 0;
         rx->rec_msg_len[phase] = 0;
