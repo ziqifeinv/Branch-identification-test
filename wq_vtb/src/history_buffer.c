@@ -1,6 +1,7 @@
 #include "convolutional.h"
 #include "bit.h"
 #include "history_buffer.h"
+#include <stdlib.h>
 
 history_buffer *history_buffer_create(uint16_t min_traceback_length,
                                       uint16_t traceback_group_length,

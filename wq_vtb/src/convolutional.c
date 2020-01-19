@@ -1,4 +1,5 @@
 #include "convolutional.h"
+#include <stdlib.h>
 
 correct_convolutional *_correct_convolutional_init(correct_convolutional *conv,
                                                    size_t rate, size_t order,

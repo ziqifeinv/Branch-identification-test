@@ -1,4 +1,5 @@
 #include "bit.h"
+#include <stdlib.h>
 
 bit_writer_t *bit_writer_create(uint8_t *bytes, size_t len) {
     bit_writer_t *w = malloc( sizeof(bit_writer_t));

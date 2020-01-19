@@ -1,6 +1,7 @@
 //#include <stdio.h>
 //#include "convolutional.h"
 #include "conv_decode.h"
+#include <stdlib.h>
 
 /*void conv_decode_print_iter(correct_convolutional *conv, uint16_t iter,
                             uint16_t winner_index) {

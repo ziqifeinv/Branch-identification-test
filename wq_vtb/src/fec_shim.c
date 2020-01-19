@@ -4,6 +4,7 @@
 #include "fec_shim.h"
 //#include "os_mem_api.h"
 //#include "iot_module_api.h"
+#include <stdlib.h>
 
 typedef struct {
     correct_reed_solomon *rs;

@@ -1,5 +1,6 @@
 #include "convolutional.h"
 #include "error_buffer.h"
+#include <stdlib.h>
 
 error_buffer_t *error_buffer_create(uint16_t num_states) {
     error_buffer_t *buf = malloc( sizeof(error_buffer_t));

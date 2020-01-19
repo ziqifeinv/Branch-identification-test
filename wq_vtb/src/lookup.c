@@ -1,5 +1,6 @@
 #include "convolutional.h"
 #include "lookup.h"
+#include <stdlib.h>
 
 // table has numstates rows
 // each row contains all of the polynomial output bits concatenated together

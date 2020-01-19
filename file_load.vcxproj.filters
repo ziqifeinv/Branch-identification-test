@@ -197,5 +197,8 @@
     <ClInclude Include="wq_vtb\inc\wq_debug.h">
       <Filter>头文件\inc</Filter>
     </ClInclude>
+    <ClInclude Include="wq_vtb\inc\wq_version.h">
+      <Filter>头文件\inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

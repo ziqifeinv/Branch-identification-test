@@ -70,10 +70,10 @@ uint8_t wq_vtb_topo_zc_delta_handle(uint8_t *data, uint8_t data_len,
 
  * @return value: decode success flag.
  */
-uint8_t wq_vtb_topo_bit_rec(uint8_t *rx_ptr,  uint8_t phase,
-    int32_t *sample_data, uint16_t data_len, uint8_t sample_order,
-    uint8_t *decoded_data, uint8_t *decoded_data_len, int8_t *offset,
-    int16_t *data_offset);
+uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
+    int32_t* sample_data, uint16_t data_len, uint8_t sample_order,
+    uint8_t* decoded_data, uint8_t* decoded_data_len, int8_t* offset,
+    int16_t* data_offset, uint32_t counter);
 
 /**
  * @brief: receive related pointers and variables destroy.
