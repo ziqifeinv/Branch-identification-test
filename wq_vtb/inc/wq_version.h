@@ -32,10 +32,29 @@ V3.4:
 #ifndef __WQ_VERSION_H__
 #define __WQ_VERSION_H__
 
+#define PLC_SUPPORT_HW_TSFM 1
+#define PLC_SUPPORT_HW_TOPO 1
+
 #define TOPO_V3_3	0x0303
 #define TOPO_V3_4	0x0304
-
 #define TOPO_VERSION	TOPO_V3_4
+
+/* 1.0:初版，能正常处理delta差值约300的情况，无法处理delta差值约60的情况 */
+#define TSFM_V1_0	0x0100
+/* 2.0:尝试修改参数使算法能处理delta差值60的情况，失败 */
+#define TSFM_V2_0	0x0200
+/* 3.0:仿造分支识别原理，在台区识别算法中引入位置信息，改进后算法正常处理7字节长度的数据，但无法处理异常情况*/
+#define TSFM_V3_0	0x0300
+/* 3.1:增加1~6字节长度的数据处理逻辑，正常运行*/
+#define TSFM_V3_1	0x0301
+/* 3.2:delta数据存在偏移的情况，如果偏移前后的数据刚好跨越两个检索区间，则会出现无法识别的问题。
+	3.2加入增加交叉检索功（如24-22和23-21属于交叉区间），目前的逻辑建立在畸变漂移不大（不超过2）的前提下*/
+#define TSFM_V3_2	0x0302
+
+/* 3.3:增加平滑，算法优化噪声*/
+#define TSFM_V3_3	0x0303
+
+#define TSFM_VERSION	TSFM_V3_2
 
 #define ADC_VERSION_25_PERIOD	0x01
 #define ADC_VERSION_26_PERIOD	0x02

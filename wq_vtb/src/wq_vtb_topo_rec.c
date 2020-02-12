@@ -27,7 +27,6 @@ Information is free from patent or copyright infringement.
 #include <stdlib.h>
 #include "wq_version.h"
 
-#define PLC_SUPPORT_HW_TOPO 1
 #if PLC_SUPPORT_HW_TOPO
 
 #ifndef min
