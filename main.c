@@ -199,7 +199,7 @@ void tsfm_data_handle(FILE* file)
 
 int main(void)
 {
-	freopen("vs_log.log", "w", stdout);
+	//freopen("vs_log.log", "w", stdout);
 
 	FILE* file = NULL;
 	uint8_t data_type = 0;
