@@ -27,6 +27,8 @@ Information is free from patent or copyright infringement.
 #include <stdlib.h>
 #include "wq_version.h"
 
+#define PLC_SUPPORT_HW_TOPO 1
+
 #if PLC_SUPPORT_HW_TOPO
 
 #ifndef min
@@ -938,6 +940,7 @@ uint8_t decode_data_per_phase(rx_topo_init_t* rx, uint8_t phase,
     else {
         wq_info_printf("phase %d frame broken!", phase);
     }
+    wq_dbg_printf("CRC check %s !!", (flag ? "success" : "failure"));
     *reset = 1;
     return flag;
 }
@@ -1053,19 +1056,19 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
                 rx->bit1_counter[phase]++;
             }
 #else if(TOPO_VERSION >= TOPO_V3_3)
-                if (preamble_bit.bit_pos[i] < (pos_smooth_temp + 128)
-                    && preamble_bit.bit_pos[i] > (pos_smooth_temp - 128)) {
-                    rx->pos_smooth[phase] = pos_smooth_temp;
-                    rx->correct_offset[phase] = preamble_bit.bit_pos[i];
-                    if (preamble_bit.mag_sign[i] == 1) {
-                        rx->act_bits[phase]++;
-                    }
-                    else {
-                        rx->neg_bits[phase]++;
-                    }
-                    break;
+            if (preamble_bit.bit_pos[i] < (pos_smooth_temp + 128)
+                && preamble_bit.bit_pos[i] > (pos_smooth_temp - 128)) {
+                rx->pos_smooth[phase] = pos_smooth_temp;
+                rx->correct_offset[phase] = preamble_bit.bit_pos[i];
+                if (preamble_bit.mag_sign[i] == 1) {
+                    rx->act_bits[phase]++;
                 }
+                else {
+                    rx->neg_bits[phase]++;
+                }
+                break;
             }
+        }
 #endif
         }
         wq_dbg_printf("phase %d bit, mask %d, cout %d, pos:%d,%d,%d, smooth pos:%d, next %d.",

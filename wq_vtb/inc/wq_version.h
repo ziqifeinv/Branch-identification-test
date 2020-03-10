@@ -54,7 +54,7 @@ V3.4:
 /* 3.3:增加平滑，算法优化噪声*/
 #define TSFM_V3_3	0x0303
 
-#define TSFM_VERSION	TSFM_V3_2
+#define TSFM_VERSION	TSFM_V3_3
 
 #define ADC_VERSION_25_PERIOD	0x01
 #define ADC_VERSION_26_PERIOD	0x02

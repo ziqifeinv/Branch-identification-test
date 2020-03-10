@@ -21,9 +21,11 @@ Information is free from patent or copyright infringement.
 #include "crc_check.h"
 #include "preamble_generator.h"
 #include "wq_vtb_bit_rec.h"
-#include "wq_version.h"
 #include "stdlib.h"
 #include "wq_debug.h"
+#include "wq_version.h"
+
+#define PLC_SUPPORT_HW_TSFM 1
 
 #if PLC_SUPPORT_HW_TSFM
 
@@ -35,7 +37,6 @@ Information is free from patent or copyright infringement.
 #else
 #define WQ_VTB_VAR_MAX          40
 #endif
-
 /* define the number of cycles of data processed each time */
 #define WQ_VTB_PERIOD_NUM       25
 /* define demodulation threshold, uint is 1us. */
@@ -59,8 +60,9 @@ typedef struct _wq_tsfm_prm_bit_t {
 typedef struct _wq_tsfm_prm_info_t {
     uint32_t preamble;
     uint8_t pos;
+    float smooth_pos;
     uint8_t err_bit;
-    wq_tsfm_prm_bit_t bit_info[WQ_VTB_PREAMBLE_LENGTH + 1];
+    wq_tsfm_prm_bit_t bit_info[WQ_VTB_PREAMBLE_LENGTH];
 } wq_tsfm_prm_info_t;
 #endif
 
@@ -135,6 +137,14 @@ static float math_sqrt_newton_iterative_tsfm(float x)
     return u.x * (1.5f - 0.5f * x * u.x * u.x) * x;
 }
 
+uint8_t isInArray(uint8_t* array, uint8_t targetData, uint8_t len) {
+    for (uint8_t i = 0; i < len; i++) {
+        if (array[i] == targetData)
+            return 1;
+    }
+    return 0;
+}
+
 #if (TSFM_VERSION >= TSFM_V2_0)
 #if (TSFM_VERSION >= TSFM_V3_0)
 uint8_t checkJump(uint16_t* data, uint8_t targetPos, float ave_delta) {
@@ -182,7 +192,7 @@ uint8_t checkJump(uint16_t* data, uint8_t targetPos) {
     if ((data[targetPos - 1] < WQ_VTB_DELTA_REF       //v3.0
         && data[targetPos] > WQ_VTB_DELTA_REF)
         || (data[targetPos + 1] > WQ_VTB_DELTA_REF
-        && data[targetPos] < WQ_VTB_DELTA_REF))
+            && data[targetPos] < WQ_VTB_DELTA_REF))
         return 1;
     return 0;
 }
@@ -470,40 +480,118 @@ uint8_t dis_detect_1(uint16_t* delta_vec, int8_t expect_pos,
     }
     var = math_sqrt_newton_iterative_tsfm(temp_dis / (WQ_VTB_PERIOD_NUM - 1));
 
-    uint8_t pos_num = 0, pre_pos = 0;
-    uint8_t temp_pos[WQ_VTB_PERIOD_NUM];
+    uint8_t pos_num = 0;
+    uint8_t temp_pos[WQ_VTB_PERIOD_NUM] = { 0 };
+    uint16_t min_val = 30000, max_val = 0;
+#if (TSFM_VERSION >= TSFM_V3_3)
+    for (uint8_t i = 0; i < WQ_VTB_PERIOD_NUM; i++) {
+        if (delta_vec[i] >= max_val) {
+            max_val = delta_vec[i];
+        }
+        if (delta_vec[i] <= min_val) {
+            min_val = delta_vec[i];
+        }
+    }
+
+    if (var <= 5 || (max_val - min_val <= 20)) {
+        printf("return 0 case 1 \n");
+        return 0;
+    }
 
     for (uint8_t i = 0; i < WQ_VTB_PERIOD_NUM; i++) {
-        if (delta_vec[i] > ave1 + WQ_VTB_COFF * var
-            || delta_vec[i] < ave1 - WQ_VTB_COFF * var) {
-            //if (!pre_pos || i != pre_pos) {     //v3.0
-            if (((!pre_pos) || (i != pre_pos)) && (checkJump(delta_vec, i, 20000))) {  //v3.1
-                pre_pos = i + 1;
-                temp_pos[pos_num] = i + 1;
-                pos_num++;
-            }
+        if (delta_vec[i] > ave1 + WQ_VTB_COFF * var || delta_vec[i] < ave1 - WQ_VTB_COFF * var) {
+            temp_pos[pos_num] = i + 1;
+            pos_num++;
         }
     }
 
     if (!pos_num) {
+        printf("return 0 case 2 \n");
         return 0;
     }
 
-    uint8_t eff_num = min(pos_num, WQ_VTB_PREM_BIT_GROUP_SIZE);
+    uint8_t pos_num1 = 0, neighborNum = 0;
+    //uint8_t neighborPos[pos_num], temp_pos_new[pos_num];
+    uint8_t* neighborPos = malloc(sizeof(uint8_t) * pos_num);
+    uint8_t* temp_pos_new = malloc(sizeof(uint8_t) * pos_num);
+    memset(neighborPos, 0, sizeof(*neighborPos));
+    memset(temp_pos_new, 0, sizeof(*temp_pos_new));
+
+    for (uint8_t j = 0; j < pos_num; j++) {
+        if (!(isInArray(neighborPos, temp_pos[j], pos_num))) {
+            if (delta_vec[temp_pos[j] - 1] <= ave1) {
+                if ((temp_pos[j] == WQ_VTB_PERIOD_NUM) && (delta_vec[temp_pos[j] - 1] <= ave1 - var)) {
+                    temp_pos_new[pos_num1] = temp_pos[j];
+                    pos_num1++;
+                }
+                else {
+                    if (isInArray(temp_pos, temp_pos[j] + 1, WQ_VTB_PERIOD_NUM) && delta_vec[temp_pos[j]] > ave1 + var) {
+                        temp_pos_new[pos_num1] = temp_pos[j];
+                        pos_num1++;
+                        neighborPos[neighborNum] = temp_pos[j] + 1;
+                        neighborNum++;
+                    }
+                    if (!isInArray(temp_pos, temp_pos[j] + 1, WQ_VTB_PERIOD_NUM) && delta_vec[temp_pos[j]] > ave1 + var) {
+                        temp_pos_new[pos_num1] = temp_pos[j];
+                        pos_num1++;
+                    }
+                }
+            }
+            else {
+                if ((temp_pos[j] == 1) && (delta_vec[temp_pos[j] - 1] >= ave1 + var)) {
+                    temp_pos_new[pos_num1] = temp_pos[j];
+                    pos_num1++;
+                }
+                else {
+                    if (isInArray(temp_pos, temp_pos[j] - 1, WQ_VTB_PERIOD_NUM) && delta_vec[temp_pos[j] - 2] < ave1 - var) {
+                        temp_pos_new[pos_num1] = temp_pos[j] - 1;
+                        pos_num1++;
+                        neighborPos[neighborNum] = temp_pos[j];
+                        neighborNum++;
+                    }
+                    if (!isInArray(temp_pos, temp_pos[j] - 1, WQ_VTB_PERIOD_NUM) && delta_vec[temp_pos[j] - 2] < ave1 - var) {
+                        temp_pos_new[pos_num1] = temp_pos[j] - 1;
+                        pos_num1++;
+                    }
+                }
+            }
+        }
+    }
+
+    if (!pos_num1) {
+        free(temp_pos_new);
+        free(neighborPos);
+        printf("return 0 case 3 \n");
+        return 0;
+    }
+
+    uint8_t eff_num = min(pos_num1, WQ_VTB_PREM_BIT_GROUP_SIZE);
     preamble_bits_data->bit_cnt = eff_num;
-    memcpy(&preamble_bits_data->bit_pos[0], temp_pos,
-        sizeof(uint8_t) * eff_num);
+    memcpy(&preamble_bits_data->bit_pos[0], temp_pos_new, sizeof(uint8_t) * eff_num);
+
     if (expect_pos < 0) { // during preamble search period
+        printf("return 0 case 4 \n");
+        free(temp_pos_new);
+        free(neighborPos);
         return 0;
     }
     else {// during data demod period
-        for (uint8_t i = 0; i < pos_num; i++) {
-            if (abs(temp_pos[i] - expect_pos) <= 2) {
+        for (uint8_t i = 0; i < pos_num1; i++) {
+            if (abs(temp_pos_new[i] - expect_pos) <= 2) {
+                printf("return 1 case 1 \n");
+                free(temp_pos_new);
+                free(neighborPos);
                 return 1;
             }
         }
+        printf("return 0 case 5 \n");
+        free(temp_pos_new);
+        free(neighborPos);
         return 0;
     }
+#else
+    
+#endif
 }
 
 void wq_tsfm_prm_push_bit(rx_init_t* rx, wq_tsfm_prm_bit_t* bit_info)
@@ -549,7 +637,7 @@ void wq_tsfm_seek_preamble(rx_init_t* rx, uint8_t head, uint8_t tail,
                 if (rx->prm_info.err_bit <= rx->popcnt_threshold) {
                     rx->prm_info.pos = pos;
                     rx->prm_info.preamble = preamble;
-                    wq_tsfm_dbg_printf("tsfm preamble find, preamble:%08x, data_len:%d, "
+                    wq_tsfm_dbg_printf("tsfm preamble found, preamble:%08x, data_len:%d, "
                         "pos:%d, err bit:%d", rx->prm_info.preamble, i + 1,
                         rx->prm_info.pos, rx->prm_info.err_bit);
                     rx->rec_msg_len = rx->conv->rate * (i + 1 + 3);
@@ -742,43 +830,28 @@ uint8_t wq_vtb_bit_rec(uint8_t *r_handle, uint16_t delta,
             }
             wq_tsfm_delta_buf_update(rx, rx->prm_info.pos);
             rx->prm_info.pos = 12;
+            rx->prm_info.smooth_pos = 12.0;
         }
         goto out;
     }
 
-    uint8_t actual_pos = rx->prm_info.pos;
-    //if (mask) {
-    //    uint8_t diff_pos_min = 0xff, diff_pos = 0xff;
-    //    for (uint8_t i = 0; i < bit_info.bit_cnt; i++) {
-    //        diff_pos = abs(rx->prm_info.pos - bit_info.bit_pos[i]);
-    //        if (diff_pos <= WQ_TSFM_PRM_SEARCH_RANGE) {
-    //            if (diff_pos < diff_pos_min) {
-    //                diff_pos_min = diff_pos;
-    //                actual_pos = bit_info.bit_pos[i];
-    //                //rx->prm_info.pos = actual_pos;
-    //            }
-    //        }
-    //    }
-    //}
-
     if (mask) {
-        uint8_t diff_pos_min = 0xff, diff_pos = 0xff;
-        uint8_t change_dir = 0;     //1->up; 1:down
+        uint8_t diff_pos_min = 0xff, diff_pos = 0xff, cnt_temp = 0xff;
         for (uint8_t i = 0; i < bit_info.bit_cnt; i++) {
-            if (rx->prm_info.pos < bit_info.bit_pos[i]) {
-                change_dir = 1;
-            }
             diff_pos = abs(rx->prm_info.pos - bit_info.bit_pos[i]);
             if (diff_pos <= WQ_TSFM_PRM_SEARCH_RANGE) {
                 if (diff_pos < diff_pos_min) {
                     diff_pos_min = diff_pos;
-                    actual_pos = bit_info.bit_pos[i];
-                    if (diff_pos_min == WQ_TSFM_PRM_SEARCH_RANGE) {
-                        rx->prm_info.pos = change_dir ? (rx->prm_info.pos + 1) : (rx->prm_info.pos - 1);
-                    }
-                    //rx->prm_info.pos = actual_pos;
+                    cnt_temp = i;
                 }
             }
+        }
+        if (diff_pos_min != 0xff) {
+            float actual_pos_f = (float)bit_info.bit_pos[cnt_temp];
+            rx->prm_info.smooth_pos = actual_pos_f * 0.2
+                + rx->prm_info.smooth_pos * 0.8;
+            rx->prm_info.pos = (uint8_t)rx->prm_info.smooth_pos
+                + ((rx->prm_info.smooth_pos - (int)rx->prm_info.smooth_pos) >= 0.5 ? 1 : 0);
         }
     }
     wq_tsfm_delta_buf_update(rx, 0);
@@ -800,7 +873,7 @@ uint8_t wq_vtb_bit_rec(uint8_t *r_handle, uint16_t delta,
     rx->receive_bit_num++;
     printf("mask:%d\n", mask);
     //adjust the buffer data based on offset
-    for(uint8_t i = 0; i < WQ_VTB_PERIOD_NUM + offset;i++){
+    for (uint8_t i = 0; i < WQ_VTB_PERIOD_NUM + offset; i++) {
         rx->receive_delta_buf[i] =
             rx->receive_delta_buf[WQ_VTB_PERIOD_NUM + i - offset];
     }
@@ -812,9 +885,11 @@ uint8_t wq_vtb_bit_rec(uint8_t *r_handle, uint16_t delta,
         if (rx->receive_bit_num < PREAMBLE_LENGTH) {
             rx->rec_data_buf[byte_index] += mask << bit_index_in_byte;
             goto out;
-        } else if (rx->receive_bit_num == PREAMBLE_LENGTH) {
+        }
+        else if (rx->receive_bit_num == PREAMBLE_LENGTH) {
             rx->rec_data_buf[byte_index] += mask << bit_index_in_byte;
-        } else {
+        }
+        else {
             update_preamble_register_right(rx->rec_data_buf, mask);
         }
         preamble_vector = preuso_noise_sequence();
@@ -838,7 +913,8 @@ uint8_t wq_vtb_bit_rec(uint8_t *r_handle, uint16_t delta,
                 rx->rec_data_buf[j] = 0;
             }
             goto out;
-        } else {
+        }
+        else {
             rx->preamble_try_count++;
             goto out;
         }

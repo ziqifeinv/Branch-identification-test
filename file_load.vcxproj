@@ -185,6 +185,9 @@
     <ClInclude Include="wq_vtb\inc\wq_debug.h" />
     <ClInclude Include="wq_vtb\inc\wq_version.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="version.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

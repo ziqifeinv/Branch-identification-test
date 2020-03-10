@@ -31,7 +31,7 @@ Information is free from patent or copyright infringement.
 #if WQ_TOPO_DETECT_DEBUG_PRINT
 #if (HW_PLATFORM == HW_PLATFORM_SIMU)
 #define wq_dbg_printf(fmt, ...) do{\
-        iot_wq_printf("[DEBUG]L%04d@%s:" fmt "\n",\
+        iot_wq_printf("[TOPO DEBUG]L%04d@%s:" fmt "\n",\
         __LINE__, __FUNCTION__, ##__VA_ARGS__);\
         }while(0)
 #else /* (HW_PLATFORM == HW_PLATFORM_SIMU) */
@@ -53,7 +53,7 @@ Information is free from patent or copyright infringement.
 
 #if (HW_PLATFORM == HW_PLATFORM_SIMU)
 #define wq_info_printf(fmt, ...) do{\
-        iot_wq_printf("[INFO]L%04d@%s:" fmt "\n",\
+        iot_wq_printf("[TOPO INFO]L%04d@%s:" fmt "\n",\
         __LINE__, __FUNCTION__, ##__VA_ARGS__);\
         }while(0)
 #else /* (HW_PLATFORM == HW_PLATFORM_SIMU) */

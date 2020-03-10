@@ -204,6 +204,9 @@ int main(void)
 	FILE* file = NULL;
 	uint8_t data_type = 0;
 
+	//	normol-delta300
+	//	5850正常识别-delta300
+	//	5439未识别-delta60
 	file = fopen("测试数据/tsfm/5439未识别-delta60", "r");
 	if (file == NULL) {
 		printf("file open fail!\n");
