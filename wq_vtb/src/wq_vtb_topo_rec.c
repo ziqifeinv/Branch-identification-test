@@ -25,7 +25,6 @@ Information is free from patent or copyright infringement.
 #include "wq_debug.h"
 #include "wq_vtb_topo_rec.h"
 #include <stdlib.h>
-#include "wq_version.h"
 
 #define PLC_SUPPORT_HW_TOPO 1
 

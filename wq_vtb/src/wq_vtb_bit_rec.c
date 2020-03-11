@@ -23,7 +23,6 @@ Information is free from patent or copyright infringement.
 #include "wq_vtb_bit_rec.h"
 #include "stdlib.h"
 #include "wq_debug.h"
-#include "wq_version.h"
 
 #define PLC_SUPPORT_HW_TSFM 1
 

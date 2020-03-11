@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include "wq_vtb/ext_inc/wq_vtb_topo_rec.h"
 #include "wq_vtb/ext_inc/wq_vtb_bit_rec.h"
-#include "wq_vtb/inc/wq_version.h"
 
 #define READ_BUFFER_LEN	1000
 #define ADC_DATA_LEN 7000

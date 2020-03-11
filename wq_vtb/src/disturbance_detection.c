@@ -1,7 +1,6 @@
 #include "disturbance_detection.h"
 #include <stdlib.h>
 #include "wq_debug.h"
-#include "wq_version.h"
 
 void get_pos_max_magnitude(float* data, uint16_t* group_pos, uint8_t num, float* max_val) {
     for (uint8_t i = 0; i < num; i++) {
@@ -306,11 +305,7 @@ uint8_t statis_decision(uint32_t phase, float* data, uint16_t data_length, uint8
                 group_pos_left[group_num - 1] = ref_pos;
                 //check the sign of current group
                 //sign_group_pos[group_num-1] = check_sign_new(data, current_group_pos, count, ref_pos);
-#if(TOPO_VERSION >= TOPO_V3_4)
                 sign_group_pos[group_num - 1] = check_sign_new2(data, data_length, ref_pos);
-#else if(TOPO_VERSION >= TOPO_V3_3)
-                sign_group_pos[group_num - 1] = check_sign_new1(data, data_length, ref_pos);
-#endif
                 //reset current position group
                 memset(current_group_pos, 0, sizeof(current_group_pos));
                 //reset count
@@ -331,11 +326,7 @@ uint8_t statis_decision(uint32_t phase, float* data, uint16_t data_length, uint8
         get_pos_max_magnitude(data, current_group_pos, count, &max_mag[group_num - 1]);
         group_pos_left[group_num - 1] = ref_pos;
         //sign_group_pos[group_num-1] = check_sign_new(data, current_group_pos, count, ref_pos);
-#if(TOPO_VERSION >= TOPO_V3_4)
         sign_group_pos[group_num - 1] = check_sign_new2(data, data_length, ref_pos);
-#else if(TOPO_VERSION >= TOPO_V3_3)
-        sign_group_pos[group_num - 1] = check_sign_new1(data, data_length, ref_pos);
-#endif
         //if the found number of groups is less than expectation, return directly
         if (group_num <= PREAMBLE_BIT_GROUP) {
             preamble_bits_data->bit_cnt = group_num;
@@ -402,11 +393,7 @@ uint8_t statis_decision(uint32_t phase, float* data, uint16_t data_length, uint8
                 //deal with current group: get the max magnitude and its position
                 get_pos_max_magnitude(data, current_group_pos, count, &max_mag[group_num - 1]);
                 group_pos_left[group_num - 1] = ref_pos;
-#if(TOPO_VERSION >= TOPO_V3_4)
                 sign_group_pos[group_num - 1] = check_sign_new2(data, data_length, ref_pos);
-#else if(TOPO_VERSION >= TOPO_V3_3)
-                sign_group_pos[group_num - 1] = check_sign_new1(data, data_length, ref_pos);
-#endif
                 //reset current position group
                 memset(current_group_pos, 0, sizeof(current_group_pos));
                 //reset count
@@ -427,11 +414,7 @@ uint8_t statis_decision(uint32_t phase, float* data, uint16_t data_length, uint8
         get_pos_max_magnitude(data, current_group_pos, count, &max_mag[group_num - 1]);
         group_pos_left[group_num - 1] = ref_pos;
         //sign_group_pos[group_num-1] = check_sign_new(data, current_group_pos, count, ref_pos);
-#if(TOPO_VERSION >= TOPO_V3_4)
         sign_group_pos[group_num - 1] = check_sign_new2(data, data_length, ref_pos);
-#else if(TOPO_VERSION >= TOPO_V3_3)
-        sign_group_pos[group_num - 1] = check_sign_new1(data, data_length, ref_pos);
-#endif
         //if the found number of groups is less than expectation, return directly
         if (group_num <= PREAMBLE_BIT_GROUP) {
             preamble_bits_data->bit_cnt = group_num;
