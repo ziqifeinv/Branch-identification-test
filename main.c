@@ -213,8 +213,6 @@ int main(void)
 		getchar();
 		return 0;
 	}
-
-	printf("topo version:%x \n", TOPO_VERSION);
 	
 	//topo_data_handle(file);
 	tsfm_data_handle(file);

@@ -112,13 +112,8 @@ typedef struct {
     /* avg value for each phase. */
     float avg_value[PREAMBLE_PHASE_NUM];
     /* the distortion direction for each phase */
-#if(TOPO_VERSION >= TOPO_V3_4)
     uint16_t sign_sum[PREAMBLE_PHASE_NUM];
     uint16_t bit1_counter[PREAMBLE_PHASE_NUM];
-#else if(TOPO_VERSION >= TOPO_V3_3)
-    uint16_t act_bits[PREAMBLE_PHASE_NUM];
-    uint16_t neg_bits[PREAMBLE_PHASE_NUM];
-#endif
     /* historical information of distortion position */
     uint16_t pos_smooth[PREAMBLE_PHASE_NUM];
     uint8_t first_mask[PREAMBLE_PHASE_NUM];
@@ -977,11 +972,9 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
     uint8_t i = 0;
     rx_topo_init_t* rx = (rx_topo_init_t*)rx_ptr;
     uint16_t pos_smooth_temp = 0;
-#if(TOPO_VERSION >= TOPO_V3_4)
     uint16_t diff_pos_value = 0;
     uint16_t diff_pos_value_last = 0;
     uint8_t almost_pos_index = 0xff;
-#endif
     /*
         if (phase == 0) {
             wq_vtb_adc_data_format_print(sample_data, data_len, phase);
@@ -1038,7 +1031,6 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
                     pos_smooth_temp = (rx->pos_smooth[phase] * 7
                         + preamble_bit.bit_pos[i] * 3) / 10;
                 }
-#if(TOPO_VERSION >= TOPO_V3_4)
                 diff_pos_value =
                     abs(pos_smooth_temp - preamble_bit.bit_pos[i]);
                 if (diff_pos_value < 128) {
@@ -1055,21 +1047,6 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
                 rx->sign_sum[phase] += preamble_bit.mag_sign[almost_pos_index];
                 rx->bit1_counter[phase]++;
             }
-#else if(TOPO_VERSION >= TOPO_V3_3)
-            if (preamble_bit.bit_pos[i] < (pos_smooth_temp + 128)
-                && preamble_bit.bit_pos[i] > (pos_smooth_temp - 128)) {
-                rx->pos_smooth[phase] = pos_smooth_temp;
-                rx->correct_offset[phase] = preamble_bit.bit_pos[i];
-                if (preamble_bit.mag_sign[i] == 1) {
-                    rx->act_bits[phase]++;
-                }
-                else {
-                    rx->neg_bits[phase]++;
-                }
-                break;
-            }
-        }
-#endif
         }
         wq_dbg_printf("phase %d bit, mask %d, cout %d, pos:%d,%d,%d, smooth pos:%d, next %d.",
             phase, mask, preamble_bit.bit_cnt, preamble_bit.bit_pos[0],
@@ -1080,7 +1057,6 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
         decode_flag = decode_data_per_phase(rx, phase, mask, decoded_data,
             decoded_data_len, &reset);
         if (decode_flag) {
-#if(TOPO_VERSION >= TOPO_V3_4)
             wq_dbg_printf("phase %d sign sum:%d, bit1 counter:%d, "
                 "probability of upward:%d%%", phase,
                 rx->sign_sum[phase], rx->bit1_counter[phase],
@@ -1089,15 +1065,6 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
                 wq_dbg_printf("data will be discarded");
                 decode_flag = 0;
             }
-#else if(TOPO_VERSION >= TOPO_V3_3)
-            wq_dbg_printf("phase %d act_bits:%d, neg_bits:%d \n", phase,
-                rx->act_bits[phase], rx->neg_bits[phase]);
-            if ((rx->neg_bits[phase] * 3)
-                >= (rx->act_bits[phase] + rx->neg_bits[phase])) {
-                decode_flag = 0;
-                wq_dbg_printf("data will be discarded");
-            }
-#endif
         }
     }
 #if 0 /* TODO : Remove delta for this point. Coming soon */
@@ -1118,13 +1085,8 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
         for (uint16_t i = 0; i < 160; i++) {
             rx->phase_data_buf[phase][i] = 0;
         }
-#if(TOPO_VERSION >= TOPO_V3_4)
         rx->bit1_counter[phase] = 0;
         rx->sign_sum[phase] = 0;
-#else if(TOPO_VERSION >= TOPO_V3_3)
-        rx->act_bits[phase] = 0;
-        rx->neg_bits[phase] = 0;
-#endif
         rx->first_mask[phase] = 1;
         rx->pos_smooth[phase] = 0;
         rx->call_time[phase] = 0;
