@@ -180,7 +180,7 @@ uint8_t isExistNeighbor(uint16_t* pos_vec, uint8_t len, uint8_t targetPos) {
 
 uint8_t dis_detect(uint16_t *delta_vec, int8_t *offset){
 
-    //printf("enter detection function\n");
+    //wq_tsfm_dbg_printf("enter detection function\n");
     uint32_t sum = 0; float ave = 0.0;
     uint8_t num = 0;
     float var = 0.0;
@@ -212,7 +212,7 @@ uint8_t dis_detect(uint16_t *delta_vec, int8_t *offset){
         temp_dis += dis * dis;
     }
     var = math_sqrt_newton_iterative_tsfm(temp_dis/(WQ_VTB_PERIOD_NUM -1));
-    printf("ave:%d, ave1:%d, var:%d \n", (int)ave, (int)ave1, (int)var);
+    wq_tsfm_dbg_printf("ave:%d, ave1:%d, var:%d \n", (int)ave, (int)ave1, (int)var);
 
     uint8_t up_num = 0, low_num = 0;
     uint8_t up_pos[WQ_VTB_PERIOD_NUM], low_pos[WQ_VTB_PERIOD_NUM];
@@ -228,11 +228,11 @@ uint8_t dis_detect(uint16_t *delta_vec, int8_t *offset){
         }
     }
 
-    printf("up_num:%d, low_num:%d \n", up_num, low_num);
+    wq_tsfm_dbg_printf("up_num:%d, low_num:%d \n", up_num, low_num);
 
     if (!(up_num + low_num) || (up_num + low_num >= 4)) {
         *offset = 0;
-        printf("return 0 from case 2");
+        wq_tsfm_dbg_printf("return 0 from case 2");
         return 0;
     }
     else if (up_num + low_num == 1) {
@@ -241,7 +241,7 @@ uint8_t dis_detect(uint16_t *delta_vec, int8_t *offset){
         if((pos <= 6) ||(pos >= 20)){
             *offset = 12 - pos;
         }
-        printf("return 1 from case 1");
+        wq_tsfm_dbg_printf("return 1 from case 1");
         return 1;
     } else {
         *offset = 0;
@@ -267,7 +267,7 @@ uint8_t dis_detect(uint16_t *delta_vec, int8_t *offset){
             *offset = 12 - ave_pos;
         }
         free(temp);
-        printf("return 1 from case 2");
+        wq_tsfm_dbg_printf("return 1 from case 2");
         return 1;
     }
 }
@@ -275,7 +275,7 @@ uint8_t dis_detect(uint16_t *delta_vec, int8_t *offset){
 uint8_t dis_detect_1(uint16_t* delta_vec, int8_t expect_pos,
     wq_tsfm_prm_bit_t* preamble_bits_data)
 {
-    //printf("enter detection function\n");
+    //wq_tsfm_dbg_printf("enter detection function\n");
     uint32_t sum = 0;
     uint8_t num = 0;
     float var = 0.0, ave = 0.0, ave1 = 0.0;
@@ -328,7 +328,7 @@ uint8_t dis_detect_1(uint16_t* delta_vec, int8_t expect_pos,
     }
 
     if (var <= 5 || (max_val - min_val <= 20)) {
-        printf("return 0 case 1 \n");
+        wq_tsfm_dbg_printf("return 0 case 1 \n");
         return 0;
     }
 
@@ -340,7 +340,7 @@ uint8_t dis_detect_1(uint16_t* delta_vec, int8_t expect_pos,
     }
 
     if (!pos_num) {
-        printf("return 0 case 2 \n");
+        wq_tsfm_dbg_printf("return 0 case 2 \n");
         return 0;
     }
 
@@ -395,7 +395,7 @@ uint8_t dis_detect_1(uint16_t* delta_vec, int8_t expect_pos,
     if (!pos_num1) {
         free(temp_pos_new);
         free(neighborPos);
-        printf("return 0 case 3 \n");
+        wq_tsfm_dbg_printf("return 0 case 3 \n");
         return 0;
     }
 
@@ -404,7 +404,7 @@ uint8_t dis_detect_1(uint16_t* delta_vec, int8_t expect_pos,
     memcpy(&preamble_bits_data->bit_pos[0], temp_pos_new, sizeof(uint8_t) * eff_num);
 
     if (expect_pos < 0) { // during preamble search period
-        printf("return 0 case 4 \n");
+        wq_tsfm_dbg_printf("return 0 case 4 \n");
         free(temp_pos_new);
         free(neighborPos);
         return 0;
@@ -412,13 +412,13 @@ uint8_t dis_detect_1(uint16_t* delta_vec, int8_t expect_pos,
     else {// during data demod period
         for (uint8_t i = 0; i < pos_num1; i++) {
             if (abs(temp_pos_new[i] - expect_pos) <= 2) {
-                printf("return 1 case 1 \n");
+                wq_tsfm_dbg_printf("return 1 case 1 \n");
                 free(temp_pos_new);
                 free(neighborPos);
                 return 1;
             }
         }
-        printf("return 0 case 5 \n");
+        wq_tsfm_dbg_printf("return 0 case 5 \n");
         free(temp_pos_new);
         free(neighborPos);
         return 0;
@@ -469,6 +469,9 @@ void wq_tsfm_seek_preamble(rx_init_t* rx, uint8_t head, uint8_t tail,
                     rx->prm_info.preamble = preamble;
                     wq_tsfm_dbg_printf("tsfm preamble found, preamble:%08x, data_len:%d, "
                         "pos:%d, err bit:%d", rx->prm_info.preamble, i + 1,
+                        rx->prm_info.pos, rx->prm_info.err_bit);
+                    printf("tsfm preamble found, preamble:%08x, data_len:%d, "
+                        "pos:%d, err bit:%d \n", rx->prm_info.preamble, i + 1,
                         rx->prm_info.pos, rx->prm_info.err_bit);
                     rx->rec_msg_len = rx->conv->rate * (i + 1 + 3);
                     rx->packet_det_flag = 1;
@@ -546,12 +549,12 @@ uint8_t wq_vtb_bit_rec(uint8_t *r_handle, uint16_t delta,
     if (rx->receive_delta_num < 2 * WQ_VTB_PERIOD_NUM) {
         goto out;
     }
-    printf("receive bit num:%d, delta data:", rx->receive_bit_num);
+    iot_wq_printf("receive bit num:%d, delta data:", rx->receive_bit_num);
     for (uint8_t i = 0; i < WQ_VTB_PERIOD_NUM; i++) {
         delta_data[i] = rx->receive_delta_buf[i];
-        printf("%d ", delta_data[i]);
+        iot_wq_printf("%d ", delta_data[i]);
     }
-    printf("\n");
+    iot_wq_printf("\n");
 
     //detect the disturbrance
     if (!rx->packet_det_flag) {
@@ -632,6 +635,7 @@ uint8_t wq_vtb_bit_rec(uint8_t *r_handle, uint16_t delta,
     decode_flag = crc_result_check(crc16_polynomial, rx->rec_data_buf,
         decode_msg_len_with_crc, decoded_data, rx->conv);
     wq_tsfm_dbg_printf("CRC check %s !!", (decode_flag ? "success" : "failure"));
+    printf("CRC check %s !! \n", (decode_flag ? "success" : "failure"));
     if (decode_flag) {
         rx->crc_success_num++;
         if (rx->crc_success_num > 60000) {

@@ -26,7 +26,8 @@ Information is free from patent or copyright infringement.
 #define WQ_TSFM_DETECT_DEBUG_PRINT  1
 #endif
 
-#define iot_wq_printf printf
+extern void log_printf(const char* format, ...);
+#define iot_wq_printf log_printf
 
 #if WQ_TOPO_DETECT_DEBUG_PRINT
 #if (HW_PLATFORM == HW_PLATFORM_SIMU)

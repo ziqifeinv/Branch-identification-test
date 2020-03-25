@@ -203,7 +203,7 @@ uint8_t wq_vtb_topo_zc_delta_handle(uint8_t* data, uint8_t data_len,
     if (g_wq_vtb_topo_delta == NULL) {
         g_wq_vtb_topo_delta = malloc(sizeof(*g_wq_vtb_topo_delta));
         if (g_wq_vtb_topo_delta == NULL) {
-            printf("%s mem malloc failed! \n", __FUNCTION__);
+            wq_dbg_printf("%s mem malloc failed! \n", __FUNCTION__);
             assert(0);
         }
         memset(g_wq_vtb_topo_delta, 0, sizeof(wq_vtb_topo_delta_t));
@@ -216,7 +216,7 @@ uint8_t wq_vtb_topo_zc_delta_handle(uint8_t* data, uint8_t data_len,
     for (i = 0, sum_new = 0; i < data_len; i++) {
         if (temp[i] > WQ_VTB_ZC_DELTA_VALUE_MAX
             || temp[i] < WQ_VTB_ZC_DELTA_VALUE_MIN) {
-            printf("[topo debug]%s zc delta abnormal:%d \n",
+            wq_dbg_printf("[topo debug]%s zc delta abnormal:%d \n",
                 __FUNCTION__, temp[i]);
         }
         sum_new += temp[i];
@@ -545,6 +545,10 @@ uint32_t wq_preamble_detect(rx_topo_init_t* rx, uint32_t phase,
                 "lost bits %d, pos %d, frm_len %d, pos_bits %d, neg_bits %d.",
                 phase, final_preamble->preamble, lost_bits, final_preamble->pos,
                 frame_len, pos_bits, neg_bits);
+            printf("phase %d preamble found, %08x, "
+                "lost bits %d, pos %d, frm_len %d, pos_bits %d, neg_bits %d. \n",
+                phase, final_preamble->preamble, lost_bits, final_preamble->pos,
+                frame_len, pos_bits, neg_bits);
         }
         else {
             wq_dbg_printf("phase %d preamble not found, %08x, "
@@ -836,8 +840,11 @@ uint32_t wq_preamble_detect_2(rx_topo_init_t* rx, uint32_t phase,
 
     if (data_len > 0) {
             wq_info_printf("phase %d preamble found, %08x, lost bits %d, pos %d, "
-            "ave_val:%d, frm_len %d.", phase, preamble->prmb,
-            preamble->err_bits, preamble->pos, (int)preamble->val, data_len);
+                "ave_val:%d, frm_len %d.", phase, preamble->prmb,
+                preamble->err_bits, preamble->pos, (int)preamble->val, data_len);
+            printf("phase %d preamble found, %08x, lost bits %d, pos %d, "
+                "ave_val:%d, frm_len %d. \n", phase, preamble->prmb,
+                preamble->err_bits, preamble->pos, (int)preamble->val, data_len);
     }
     else {
         wq_dbg_printf("phase %d preamble not found, %08x, lost bits %d, "
@@ -935,6 +942,7 @@ uint8_t decode_data_per_phase(rx_topo_init_t* rx, uint8_t phase,
         wq_info_printf("phase %d frame broken!", phase);
     }
     wq_dbg_printf("CRC check %s !!", (flag ? "success" : "failure"));
+    printf("CRC check %s !! \n", (flag ? "success" : "failure"));
     *reset = 1;
     return flag;
 }
@@ -958,6 +966,9 @@ void wq_vtb_adc_data_format_print(int32_t* buf, uint32_t len,
 
     return;
 }
+
+extern void iot_plc_hw_topo_data_print(uint8_t* buf,
+    uint32_t len, uint8_t phase);
 
 uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
     int32_t* sample_data, uint16_t data_len, uint8_t sample_order,
@@ -1056,12 +1067,18 @@ uint8_t wq_vtb_topo_bit_rec(uint8_t* rx_ptr, uint8_t phase,
         decode_flag = decode_data_per_phase(rx, phase, mask, decoded_data,
             decoded_data_len, &reset);
         if (decode_flag) {
+            iot_plc_hw_topo_data_print(decoded_data, *decoded_data_len, phase);
             wq_dbg_printf("phase %d sign sum:%d, bit1 counter:%d, "
                 "probability of upward:%d%%", phase,
                 rx->sign_sum[phase], rx->bit1_counter[phase],
                 (int)(rx->sign_sum[phase] / rx->bit1_counter[phase]));
+            printf("phase %d sign sum:%d, bit1 counter:%d, "
+                "probability of upward:%d%% \n", phase,
+                rx->sign_sum[phase], rx->bit1_counter[phase],
+                (int)(rx->sign_sum[phase] / rx->bit1_counter[phase]));
             if (rx->sign_sum[phase] * 3 < rx->bit1_counter[phase] * 100 * 2) {
                 wq_dbg_printf("data will be discarded");
+                printf("data will be discarded \n");
                 decode_flag = 0;
             }
         }
