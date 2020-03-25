@@ -23,7 +23,7 @@
 #define DATA_FRAME_LEN_MAX  7
 
 /* debug macro*/
-#define USER_DEBUG			1
+#define USER_DEBUG			0
 
 /* define error type*/
 #define ERR_OK				0
@@ -83,7 +83,7 @@ void iot_plc_hw_topo_data_print(uint8_t* buf,
 	printf("<--%s-- ", __FUNCTION__);
 	log_printf("<--%s-- ", __FUNCTION__);
 	for (uint32_t i = 0; i < len; ++i) {
-		printf("%02x ", buf[i]); 
+		printf("%02x ", buf[i]);
 		log_printf("%02x ", buf[i]);
 	}
 	printf("-->len %lu, phase %lu\n", len, phase);
@@ -401,7 +401,7 @@ static void result_reduction(data_file_info_t *info)
 		&& (info->flag == info->decode_flag)
 		&& (info->number == info->decode_number)
 		&& (result == 0)) {
-		result == ERR_OK;
+		result = ERR_OK;
 	} else {
 		result = ERR_FAIL;
 	}
@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 #endif
-	
+
 	//create file info handle
 	info = malloc(sizeof(data_file_info_t));
 	if (info == NULL) {
@@ -466,7 +466,7 @@ int main(int argc, char *argv[])
 	info->data_file_path = "D:\\workspace\\vs\\file_load\\test_data\\topo 3.0\\8_topo3.0.log";
 	info->data_file = fopen(info->data_file_path, "r");
 #else
-	infi->data_file_path = argv[1];
+	info->data_file_path = argv[1];
 	info->data_file = fopen(info->data_file_path, "r");
 #endif
 	if (info->data_file == NULL) {
@@ -505,6 +505,8 @@ out:
 	if (info && info->log_file) {
 		fclose(info->log_file);
 	}
+#if USER_DEBUG
 	(void)getchar();
+#endif
 	return result;
 }
